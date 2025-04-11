@@ -3,6 +3,8 @@ const CELL_SIZE = 20;
 const COLS = 30;
 const ROWS = 30;
 const FPS = 10;
+const GAME_OFFSET = 0;  // Left panel starts at 0
+const VISUALIZATION_OFFSET = COLS * CELL_SIZE + 40;  // Right panel starts after game panel + margin
 
 // Colors
 const COLORS = {
@@ -27,6 +29,7 @@ let difficultyLevel = 1;
 let obstacles = new Set();
 let gameLoop;
 let path = [];
+let visitedNodes = new Set();
 
 // Canvas setup
 const canvas = document.getElementById('gameCanvas');
@@ -127,54 +130,83 @@ function draw() {
     ctx.fillStyle = COLORS.BLACK;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw grid
-    ctx.strokeStyle = '#333';
-    for (let x = 0; x < canvas.width; x += CELL_SIZE) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-    }
-    for (let y = 0; y < canvas.height; y += CELL_SIZE) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-    }
+    // Draw both grids
+    drawGrid(GAME_OFFSET);
+    drawGrid(VISUALIZATION_OFFSET);
 
+    // Draw game elements on left panel
+    drawGameElements(GAME_OFFSET);
+
+    // Draw visualization on right panel
+    drawVisualization(VISUALIZATION_OFFSET);
+}
+
+// Draw grid at specified offset
+function drawGrid(offset) {
+    ctx.strokeStyle = '#333';
+    for (let x = 0; x < COLS * CELL_SIZE; x += CELL_SIZE) {
+        ctx.beginPath();
+        ctx.moveTo(x + offset, 0);
+        ctx.lineTo(x + offset, ROWS * CELL_SIZE);
+        ctx.stroke();
+    }
+    for (let y = 0; y < ROWS * CELL_SIZE; y += CELL_SIZE) {
+        ctx.beginPath();
+        ctx.moveTo(offset, y);
+        ctx.lineTo(COLS * CELL_SIZE + offset, y);
+        ctx.stroke();
+    }
+}
+
+// Draw game elements (snake, food, obstacles)
+function drawGameElements(offset) {
     // Draw obstacles
     ctx.fillStyle = COLORS.GRAY;
     obstacles.forEach(obs => {
         const [x, y] = obs.split(',');
-        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        ctx.fillRect(parseInt(x) * CELL_SIZE + offset, parseInt(y) * CELL_SIZE, CELL_SIZE, CELL_SIZE);
     });
 
     // Draw snake
     ctx.fillStyle = COLORS.GREEN;
     snake.forEach(segment => {
-        ctx.fillRect(segment.x * CELL_SIZE, segment.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        ctx.fillRect(segment.x * CELL_SIZE + offset, segment.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
     });
 
     // Draw food
     ctx.fillStyle = COLORS.RED;
-    ctx.fillRect(food.x * CELL_SIZE, food.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+    ctx.fillRect(food.x * CELL_SIZE + offset, food.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+}
 
-    // Draw path if in auto mode
+// Draw visualization panel
+function drawVisualization(offset) {
+    // Draw visited nodes
+    ctx.fillStyle = COLORS.BLUE;
+    ctx.globalAlpha = 0.3;
+    visitedNodes.forEach(node => {
+        const [x, y] = node.split(',');
+        ctx.fillRect(parseInt(x) * CELL_SIZE + offset, parseInt(y) * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+    });
+
+    // Draw current path
     if (mode === "auto" && path.length > 0) {
-        ctx.fillStyle = COLORS.BLUE;
-        ctx.globalAlpha = 0.3;
+        ctx.fillStyle = COLORS.YELLOW;
+        ctx.globalAlpha = 0.5;
         path.forEach(pos => {
-            ctx.fillRect(pos.x * CELL_SIZE, pos.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            ctx.fillRect(pos.x * CELL_SIZE + offset, pos.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
         });
-        ctx.globalAlpha = 1;
     }
+    ctx.globalAlpha = 1;
+
+    // Draw current snake and food position for reference
+    drawGameElements(offset);
 }
 
 // BFS pathfinding algorithm
 function bfs() {
     const queue = [{pos: snake[0], path: []}];
-    const visited = new Set();
-    visited.add(`${snake[0].x},${snake[0].y}`);
+    visitedNodes = new Set();
+    visitedNodes.add(`${snake[0].x},${snake[0].y}`);
 
     while (queue.length > 0) {
         const {pos, path} = queue.shift();
@@ -192,8 +224,8 @@ function bfs() {
 
             const key = `${next.x},${next.y}`;
             if (next.x >= 0 && next.x < COLS && next.y >= 0 && next.y < ROWS &&
-                !visited.has(key) && !isCollision(next) && !isObstacle(next)) {
-                visited.add(key);
+                !visitedNodes.has(key) && !isCollision(next) && !isObstacle(next)) {
+                visitedNodes.add(key);
                 queue.push({
                     pos: next,
                     path: [...path, next]
@@ -266,6 +298,7 @@ function resetGame() {
     difficultyLevel = 1;
     obstacles.clear();
     path = [];
+    visitedNodes.clear();
     init();
 }
 
