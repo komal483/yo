@@ -39,6 +39,17 @@
             font-size: 18px;
             margin-bottom: 10px;
         }
+        .panels {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        .panel-label {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #888;
+        }
     </style>
 </head>
 <body>
@@ -51,7 +62,12 @@
         <button onclick="switchAlgorithm()">Switch Algorithm</button>
         <button onclick="resetGame()">Reset Game</button>
     </div>
-    <canvas id="gameCanvas" width="1200" height="600"></canvas>
+    <div class="panels">
+        <div>
+            <div class="panel-label">Game View</div>
+            <canvas id="gameCanvas" width="1240" height="600"></canvas>
+        </div>
+    </div>
     <script src="game.js"></script>
 </body>
 </html> 
