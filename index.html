@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game AI</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        canvas {
+            border: 2px solid #333;
+            margin: 20px;
+        }
+        .controls {
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .info {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Snake Game AI</h1>
+    <div class="info">
+        Algorithm: <span id="algorithm">BFS</span> | Score: <span id="score">0</span> | Difficulty: <span id="difficulty">1</span>
+    </div>
+    <div class="controls">
+        <button onclick="toggleMode()">Switch Mode</button>
+        <button onclick="switchAlgorithm()">Switch Algorithm</button>
+        <button onclick="resetGame()">Reset Game</button>
+    </div>
+    <canvas id="gameCanvas" width="1200" height="600"></canvas>
+    <script src="game.js"></script>
+</body>
+</html> 
